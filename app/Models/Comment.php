@@ -67,6 +67,21 @@ class Comment extends Model
         return $this->hasMany(CommentLike::class);
     }
 
+    public function isLikedBy(User $user): bool
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function getLikesCountAttribute(): int
+    {
+        return $this->likes()->count();
+    }
+
+    public function scopeWithLikes($query)
+    {
+        return $query->withCount('likes');
+    }
+
     /**
      * Scopes
      */

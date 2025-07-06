@@ -111,6 +111,23 @@ class User extends Authenticatable
     }
 
     /**
+     * Likes de commentaires de l'utilisateur
+     */
+    public function commentLikes(): HasMany
+    {
+        return $this->hasMany(CommentLike::class);
+    }
+
+    /**
+     * Commentaires likés par l'utilisateur
+     */
+    public function likedComments(): BelongsToMany
+    {
+        return $this->belongsToMany(Comment::class, 'comment_likes')
+            ->withTimestamps();
+    }
+
+    /**
      * Messages d'activité envoyés par l'utilisateur
      */
     public function activityMessages(): HasMany
