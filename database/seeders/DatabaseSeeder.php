@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             RelationTypeSeeder::class,
             ResourceTypeSeeder::class,
+            ResourceSeeder::class,
         ]);
     }
 }
