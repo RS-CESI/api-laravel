@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ResourceRelationTypeSeeder::class,
             CommentSeeder::class,
             UserResourceFavoriteSeeder::class,
+            UserResourceProgressionSeeder::class,
         ]);
     }
 }

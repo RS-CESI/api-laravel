@@ -209,4 +209,17 @@ class Resource extends Model
         if (!$user) return false;
         return $this->favorites()->where('user_id', $user->id)->exists();
     }
+
+    public function updateAverageRating(): void
+    {
+        $ratings = $this->progressions()->whereNotNull('user_rating')->get();
+
+        if ($ratings->count() > 0) {
+            $average = $ratings->avg('user_rating');
+            $this->update([
+                'average_rating' => round($average, 2),
+                'rating_count' => $ratings->count(),
+            ]);
+        }
+    }
 }

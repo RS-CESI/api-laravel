@@ -67,6 +67,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Resource::class, 'user_resource_favorites');
     }
 
+    public function progressions(): HasMany
+    {
+        return $this->hasMany(UserResourceProgression::class);
+    }
+
     public function favorites(): HasMany
     {
         return $this->hasMany(UserResourceFavorite::class);
