@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ResourceSeeder::class,
             ResourceRelationTypeSeeder::class,
             CommentSeeder::class,
+            UserResourceFavoriteSeeder::class,
         ]);
     }
 }

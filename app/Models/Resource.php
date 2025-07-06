@@ -94,6 +94,11 @@ class Resource extends Model
         return $this->hasMany(Comment::class)->approved();
     }
 
+    public function favoriteUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_resource_favorites');
+    }
+
     public function favorites(): HasMany
     {
         return $this->hasMany(UserResourceFavorite::class);
@@ -197,5 +202,11 @@ class Resource extends Model
         }
 
         return false;
+    }
+
+    public function isFavoritedBy(?User $user = null): bool
+    {
+        if (!$user) return false;
+        return $this->favorites()->where('user_id', $user->id)->exists();
     }
 }
