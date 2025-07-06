@@ -1,0 +1,45 @@
+services:
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: ressource-api-app
+        container_name: ressource-api
+        ports:
+            - "8000:80"
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - db
+        environment:
+            APP_URL: http://localhost:8000
+            SESSION_DRIVER: cookie
+            SESSION_DOMAIN: localhost
+            SANCTUM_STATEFUL_DOMAINS: localhost:8000,127.0.0.1:8000
+            DB_HOST: db
+            DB_PORT: 3306
+            DB_DATABASE: ressource_db
+            DB_USERNAME: root
+            DB_PASSWORD: root
+        networks:
+            - laravel-net
+
+    db:
+        image: mariadb:10.6
+        container_name: ressource-db
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: ressource_db
+        ports:
+            - "3307:3306"
+        volumes:
+            - db_data:/var/lib/mysql
+        networks:
+            - laravel-net
+
+networks:
+    laravel-net:
+
+volumes:
+    db_data:
