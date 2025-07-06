@@ -15,6 +15,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     require __DIR__.'/api/favorites.php';
     require __DIR__.'/api/progressions.php';
     require __DIR__.'/api/comments.php';
+    require __DIR__.'/api/categories.php';
     require __DIR__.'/api/activities.php';
     require __DIR__.'/api/profile.php';
     require __DIR__.'/api/moderation.php';

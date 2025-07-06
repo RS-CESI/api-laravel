@@ -97,6 +97,31 @@ class CategoryController extends Controller
     }
 
     /**
+     * Afficher une catégorie publique par ID (sans authentification)
+     */
+    public function showPublic(Category $category): JsonResponse
+    {
+        // Ne montrer que si la catégorie est active
+        if (!$category->is_active) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        // Charger les ressources publiques seulement
+        $category->load(['resources' => function($query) {
+            $query->where('status', 'published')
+                ->whereIn('visibility', ['public', 'shared'])
+                ->with(['resourceType', 'creator:id,name'])
+                ->orderBy('created_at', 'desc');
+        }]);
+
+        return response()->json([
+            'data' => $category,
+            'message' => 'Category retrieved successfully'
+        ]);
+    }
+
+
+    /**
      * Créer une nouvelle catégorie (Admins seulement)
      */
     public function store(Request $request): JsonResponse

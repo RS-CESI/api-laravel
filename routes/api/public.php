@@ -13,6 +13,8 @@ Route::get('/resources', [ResourceController::class, 'indexPublic']);
 Route::get('/resources/{resource}', [ResourceController::class, 'showPublic']);
 // Catégories et types (pour filtres)
 Route::get('/categories', [CategoryController::class, 'indexPublic']);
+Route::get('/categories/{category}', [CategoryController::class, 'showPublic']);
+
 Route::get('/relation-types', [RelationTypeController::class, 'indexPublic']);
 Route::get('/resource-types', [ResourceTypeController::class, 'indexPublic']);
 // Recherche
