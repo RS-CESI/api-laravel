@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,49 +18,37 @@ class ResourceController extends Controller
     public function indexPublic(Request $request): JsonResponse
     {
         try {
-            Log::info('Requête reçue:', $request->all());
+            $query = DB::table('resources')
+                ->leftJoin('categories', 'resources.category_id', '=', 'categories.id')
+                ->leftJoin('resource_types', 'resources.resource_type_id', '=', 'resource_types.id')
+                ->leftJoin('users', 'resources.created_by', '=', 'users.id')
+                ->select(
+                    'resources.*',
+                    'categories.name as category_name',
+                    'resource_types.name as resource_type_name',
+                    'users.name as creator_name'
+                )
+                ->where('resources.status', 'published')
+                ->where('resources.visibility', 'public')
+                ->whereNotNull('resources.published_at')
+                ->orderBy('resources.published_at', 'desc');
 
-            $query = Resource::with(['category', 'resourceType', 'creator:id,name', 'relationTypes'])
-                ->published()
-                ->public()
-                ->orderBy('published_at', 'desc');
-
-            // Filtres
-            if ($request->has('category_id')) {
-                $query->where('category_id', $request->category_id);
+            // Filtres simples
+            if ($request->has('category_id') && $request->category_id != 'all' && $request->category_id != '0') {
+                $query->where('resources.category_id', $request->category_id);
             }
 
             if ($request->has('resource_type_id')) {
-                $query->where('resource_type_id', $request->resource_type_id);
+                $query->where('resources.resource_type_id', $request->resource_type_id);
             }
 
-            if ($request->has('relation_type_id')) {
-                $query->whereHas('relationTypes', function($q) use ($request) {
-                    $q->where('relation_types.id', $request->relation_type_id);
-                });
-            }
-
-            if ($request->has('difficulty_level')) {
-                Log::info('Filtre difficulté appliqué:', ['difficulty' => $request->difficulty_level]);
-                $query->where('difficulty_level', $request->difficulty_level);
+            if ($request->has('difficulty_level') && $request->difficulty_level != 'all') {
+                $query->where('resources.difficulty_level', $request->difficulty_level);
             }
 
             if ($request->has('duration_max')) {
-                $query->where('duration_minutes', '<=', $request->duration_max);
+                $query->where('resources.duration_minutes', '<=', $request->duration_max);
             }
-
-            if ($request->has('search') && !empty($request->search)) {
-                $searchTerm = $request->search;
-                $query->where(function($q) use ($searchTerm) {
-                    $q->where('title', 'like', "%{$searchTerm}%")
-                        ->orWhere('description', 'like', "%{$searchTerm}%")
-                        ->orWhere('content', 'like', "%{$searchTerm}%")
-                        ->orWhere('difficulty_level', 'like', "%{$searchTerm}%");
-                });
-            }
-
-            // Debug: affichez la requête SQL
-            Log::info('Requête SQL:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
 
             // Pagination
             $perPage = $request->get('per_page', 15);
@@ -67,21 +56,26 @@ class ResourceController extends Controller
 
             $resources = $query->paginate($perPage);
 
+            // Reformater les données pour correspondre à l'ancien format
+            $resources->getCollection()->transform(function ($item) {
+                $item->category = $item->category_name ? (object)['name' => $item->category_name] : null;
+                $item->resource_type = $item->resource_type_name ? (object)['name' => $item->resource_type_name] : null;
+                $item->creator = $item->creator_name ? (object)['name' => $item->creator_name] : null;
+                return $item;
+            });
+
             return response()->json($resources);
 
         } catch (\Exception $e) {
             Log::error('Erreur dans indexPublic:', [
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),
-                'file' => $e->getFile(),
-                'trace' => $e->getTraceAsString()
+                'file' => $e->getFile()
             ]);
 
             return response()->json([
                 'error' => 'Erreur serveur',
-                'message' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -113,29 +107,63 @@ class ResourceController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $search = $request->get('q', '');
+        try {
+            $search = $request->get('search', $request->get('q', ''));
 
-        if (empty($search)) {
-            return response()->json(['data' => [], 'message' => 'Search query is required']);
+            $query = Resource::with(['category', 'resourceType', 'creator:id,name'])
+                ->published()
+                ->public();
+
+            // Si il y a une recherche textuelle
+            if (!empty($search)) {
+                if (config('database.default') === 'mysql') {
+                    $query->whereRaw('MATCH(title, description) AGAINST(? IN BOOLEAN MODE)', [$search]);
+                } else {
+                    $query->where(function($q) use ($search) {
+                        $q->where('title', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%")
+                            ->orWhere('difficulty_level', 'LIKE', "%{$search}%");
+                    });
+                }
+            }
+
+            // Filtres additionnels
+            if ($request->has('category_id') && $request->category_id != 'all' && $request->category_id != '0') {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if ($request->has('resource_type_id')) {
+                $query->where('resource_type_id', $request->resource_type_id);
+            }
+
+            if ($request->has('difficulty_level') && $request->difficulty_level != 'all') {
+                $query->where('difficulty_level', $request->difficulty_level);
+            }
+
+            if ($request->has('duration_max')) {
+                $query->where('duration_minutes', '<=', $request->duration_max);
+            }
+
+            // Pagination
+            $perPage = $request->get('per_page', 15);
+            $perPage = min($perPage, 100);
+
+            $resources = $query->paginate($perPage);
+
+            return response()->json($resources);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur dans search:', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
+            return response()->json([
+                'error' => 'Erreur serveur',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $query = Resource::with(['category', 'resourceType', 'creator:id,name'])
-            ->published()
-            ->public();
-
-        // Recherche full-text si disponible, sinon LIKE
-        if (config('database.default') === 'mysql') {
-            $query->whereRaw('MATCH(title, description) AGAINST(? IN BOOLEAN MODE)', [$search]);
-        } else {
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'LIKE', "%{$search}%")
-                    ->orWhere('description', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $resources = $query->paginate(10);
-
-        return response()->json($resources);
     }
 
     /**
