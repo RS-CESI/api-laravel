@@ -1,0 +1,12 @@
+node_modules
+.git
+.env
+.env.*
+!.env.api
+vendor
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+.DS_Store
+*.log
