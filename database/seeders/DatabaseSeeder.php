@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             UserResourceFavoriteSeeder::class,
             UserResourceProgressionSeeder::class,
+            ResourceActivitySeeder::class,
         ]);
     }
 }

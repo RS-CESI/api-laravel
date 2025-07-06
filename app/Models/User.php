@@ -76,4 +76,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserResourceFavorite::class);
     }
+
+    public function createdActivities(): HasMany
+    {
+        return $this->hasMany(ResourceActivity::class, 'created_by');
+    }
+
+    public function activityParticipations(): HasMany
+    {
+        return $this->hasMany(ActivityParticipant::class);
+    }
+
+    public function participatedActivities(): BelongsToMany
+    {
+        return $this->belongsToMany(ResourceActivity::class, 'activity_participants', 'user_id', 'resource_activity_id')
+            ->withPivot(['status', 'role', 'score', 'joined_at'])
+            ->withTimestamps();
+    }
 }

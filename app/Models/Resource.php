@@ -109,6 +109,11 @@ class Resource extends Model
         return $this->hasMany(UserResourceProgression::class);
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ResourceActivity::class);
+    }
+
     /**
      * Scopes
      */
