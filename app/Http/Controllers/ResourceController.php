@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -15,43 +16,75 @@ class ResourceController extends Controller
      */
     public function indexPublic(Request $request): JsonResponse
     {
-        $query = Resource::with(['category', 'resourceType', 'creator:id,name', 'relationTypes'])
-            ->published()
-            ->public()
-            ->orderBy('published_at', 'desc');
+        try {
+            Log::info('Requête reçue:', $request->all());
 
-        // Filtres
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $query = Resource::with(['category', 'resourceType', 'creator:id,name', 'relationTypes'])
+                ->published()
+                ->public()
+                ->orderBy('published_at', 'desc');
+
+            // Filtres
+            if ($request->has('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if ($request->has('resource_type_id')) {
+                $query->where('resource_type_id', $request->resource_type_id);
+            }
+
+            if ($request->has('relation_type_id')) {
+                $query->whereHas('relationTypes', function($q) use ($request) {
+                    $q->where('relation_types.id', $request->relation_type_id);
+                });
+            }
+
+            if ($request->has('difficulty_level')) {
+                Log::info('Filtre difficulté appliqué:', ['difficulty' => $request->difficulty_level]);
+                $query->where('difficulty_level', $request->difficulty_level);
+            }
+
+            if ($request->has('duration_max')) {
+                $query->where('duration_minutes', '<=', $request->duration_max);
+            }
+
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('title', 'like', "%{$searchTerm}%")
+                        ->orWhere('description', 'like', "%{$searchTerm}%")
+                        ->orWhere('content', 'like', "%{$searchTerm}%")
+                        ->orWhere('difficulty_level', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            // Debug: affichez la requête SQL
+            Log::info('Requête SQL:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+
+            // Pagination
+            $perPage = $request->get('per_page', 15);
+            $perPage = min($perPage, 100);
+
+            $resources = $query->paginate($perPage);
+
+            return response()->json($resources);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur dans indexPublic:', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Erreur serveur',
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
         }
-
-        if ($request->has('resource_type_id')) {
-            $query->where('resource_type_id', $request->resource_type_id);
-        }
-
-        if ($request->has('relation_type_id')) {
-            $query->whereHas('relationTypes', function($q) use ($request) {
-                $q->where('relation_types.id', $request->relation_type_id);
-            });
-        }
-
-        if ($request->has('difficulty_level')) {
-            $query->where('difficulty_level', $request->difficulty_level);
-        }
-
-        if ($request->has('duration_max')) {
-            $query->where('duration_minutes', '<=', $request->duration_max);
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 15);
-        $perPage = min($perPage, 100);
-
-        $resources = $query->paginate($perPage);
-
-        return response()->json($resources);
     }
-
     /**
      * Afficher une ressource publique (sans authentification)
      */
