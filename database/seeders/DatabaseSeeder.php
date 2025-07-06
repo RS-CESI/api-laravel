@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             UserResourceFavoriteSeeder::class,
             UserResourceProgressionSeeder::class,
             ResourceActivitySeeder::class,
+            ActivityMessageSeeder::class,
         ]);
     }
 }

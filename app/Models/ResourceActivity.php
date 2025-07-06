@@ -72,6 +72,16 @@ class ResourceActivity extends Model
         return $this->hasMany(ActivityMessage::class);
     }
 
+    public function publicMessages(): HasMany
+    {
+        return $this->hasMany(ActivityMessage::class)->public()->orderBy('created_at');
+    }
+
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(ActivityMessage::class)->announcements()->pinned();
+    }
+
     /**
      * Scopes
      */
