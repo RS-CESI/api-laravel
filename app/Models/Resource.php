@@ -89,6 +89,11 @@ class Resource extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function approvedComments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->approved();
+    }
+
     public function favorites(): HasMany
     {
         return $this->hasMany(UserResourceFavorite::class);
