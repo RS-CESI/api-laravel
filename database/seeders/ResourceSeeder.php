@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ResourceType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ResourceSeeder extends Seeder
 {
@@ -59,33 +60,37 @@ class ResourceSeeder extends Seeder
             ],
         ];
 
-        // Créer les ressources d'exemple
+        // Créer ou mettre à jour les ressources d'exemple
         foreach ($sampleResources as $resourceData) {
             $category = $categories->where('name', $resourceData['category'])->first() ?? $categories->random();
             $type = $resourceTypes->where('name', $resourceData['type'])->first() ?? $resourceTypes->random();
             $creator = $users->random();
             $validator = $users->where('id', '!=', $creator->id)->random();
+            $slug = Str::slug($resourceData['title']);
 
-            Resource::create([
-                'title' => $resourceData['title'],
-                'description' => $resourceData['description'],
-                'content' => $resourceData['content'],
-                'category_id' => $category->id,
-                'resource_type_id' => $type->id,
-                'created_by' => $creator->id,
-                'validated_by' => $validator->id,
-                'visibility' => 'public',
-                'status' => 'published',
-                'tags' => $resourceData['tags'],
-                'difficulty_level' => $resourceData['difficulty'],
-                'duration_minutes' => $resourceData['duration'],
-                'view_count' => rand(50, 500),
-                'favorite_count' => rand(5, 50),
-                'average_rating' => round(rand(35, 50) / 10, 1),
-                'rating_count' => rand(10, 30),
-                'published_at' => now()->subDays(rand(1, 90)),
-                'validated_at' => now()->subDays(rand(1, 90)),
-            ]);
+            Resource::updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'title' => $resourceData['title'],
+                    'description' => $resourceData['description'],
+                    'content' => $resourceData['content'],
+                    'category_id' => $category->id,
+                    'resource_type_id' => $type->id,
+                    'created_by' => $creator->id,
+                    'validated_by' => $validator->id,
+                    'visibility' => 'public',
+                    'status' => 'published',
+                    'tags' => $resourceData['tags'],
+                    'difficulty_level' => $resourceData['difficulty'],
+                    'duration_minutes' => $resourceData['duration'],
+                    'view_count' => rand(50, 500),
+                    'favorite_count' => rand(5, 50),
+                    'average_rating' => round(rand(35, 50) / 10, 1),
+                    'rating_count' => rand(10, 30),
+                    'published_at' => now()->subDays(rand(1, 90)),
+                    'validated_at' => now()->subDays(rand(1, 90)),
+                ]
+            );
         }
 
         // Créer des ressources aléatoires supplémentaires

@@ -82,15 +82,15 @@ class ResourceRelationTypeSeeder extends Seeder
                     min($applicableRelationTypes->count(), rand(1, 3))
                 );
 
-                foreach ($selectedRelationTypes as $relationType) {
-                    $resource->relationTypes()->attach($relationType->id);
-                }
+                $relationTypeIds = $selectedRelationTypes->pluck('id')->toArray();
+
+                // Attacher sans doublons
+                $resource->relationTypes()->syncWithoutDetaching($relationTypeIds);
             } else {
                 // Si aucune correspondance, attacher 1-2 types aléatoires
                 $randomRelationTypes = $relationTypes->random(rand(1, 2));
-                foreach ($randomRelationTypes as $relationType) {
-                    $resource->relationTypes()->attach($relationType->id);
-                }
+                $relationTypeIds = $randomRelationTypes->pluck('id')->toArray();
+                $resource->relationTypes()->syncWithoutDetaching($relationTypeIds);
             }
         }
 
