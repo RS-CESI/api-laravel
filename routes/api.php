@@ -231,6 +231,12 @@ Route::middleware(['auth:sanctum', 'verified', 'throttle.auth'])->group(function
 
             // Gestion des types de ressources
             Route::apiResource('resource-types', ResourceTypeController::class);
+            Route::get('/resource-types/active', [ResourceTypeController::class, 'getActiveTypes']);
+            Route::patch('/resource-types/sort-order', [ResourceTypeController::class, 'updateSortOrder']);
+            Route::post('/resource-types/{resourceType}/toggle-status', [ResourceTypeController::class, 'toggleStatus']);
+            Route::post('/resource-types/{resourceType}/validate-file', [ResourceTypeController::class, 'validateFileType']);
+            Route::get('/resource-types/stats', [ResourceTypeController::class, 'getStats']);
+            Route::get('/resource-types/common-file-types', [ResourceTypeController::class, 'getCommonFileTypes']);
 
             // Statistiques avancées
             Route::prefix('statistics')->group(function () {
