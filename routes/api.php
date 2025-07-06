@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+require __DIR__.'/api/auth.php';
+
 // Middleware public (non authentifié)
 Route::prefix('public')->middleware('throttle.public')->group(function () {
     require __DIR__.'/api/public.php';
@@ -9,7 +11,6 @@ Route::prefix('public')->middleware('throttle.public')->group(function () {
 
 // Middleware auth
 Route::middleware(['auth:sanctum', 'verified', 'throttle.auth'])->group(function () {
-    require __DIR__.'/api/auth.php';
     require __DIR__.'/api/resources.php';
     require __DIR__.'/api/favorites.php';
     require __DIR__.'/api/progressions.php';
