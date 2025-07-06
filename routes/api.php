@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/api/auth.php';
 
 // Middleware public (non authentifié)
-Route::prefix('public')->middleware('throttle.public')->group(function () {
+Route::prefix('public')->group(function () {
     require __DIR__.'/api/public.php';
 });
 
