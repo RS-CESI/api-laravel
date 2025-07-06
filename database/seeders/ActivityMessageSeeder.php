@@ -6,6 +6,7 @@ use App\Models\ActivityMessage;
 use App\Models\ResourceActivity;
 use App\Models\ActivityParticipant;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class ActivityMessageSeeder extends Seeder
 {
@@ -224,9 +225,27 @@ class ActivityMessageSeeder extends Seeder
 
     private function getRandomMessageTime($activity, $after = null)
     {
-        $start = $after ?? $activity->started_at ?? now()->subHours(2);
-        $end = $activity->completed_at ?? now();
+        // Définir les dates de début et fin de l'activité
+        $activityStart = $activity->started_at ? Carbon::parse($activity->started_at) : Carbon::now()->subHours(2);
+        $activityEnd = $activity->completed_at ? Carbon::parse($activity->completed_at) : Carbon::now();
 
-        return fake()->dateTimeBetween($start, $end);
+        if ($after) {
+            $start = Carbon::parse($after)->addMinutes(1);
+        } else {
+            $start = $activityStart;
+        }
+
+        // S'assurer que la date de début n'est pas postérieure à la date de fin
+        if ($start->greaterThanOrEqualTo($activityEnd)) {
+            // Si c'est le cas, utiliser la date de fin moins quelques minutes
+            $start = $activityEnd->copy()->subMinutes(rand(5, 30));
+        }
+
+        // S'assurer qu'on a au moins 1 minute entre le début et la fin
+        if ($start->diffInMinutes($activityEnd) < 1) {
+            return $activityEnd->copy()->subMinutes(rand(1, 5));
+        }
+
+        return fake()->dateTimeBetween($start, $activityEnd);
     }
 }
