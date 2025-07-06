@@ -118,8 +118,5 @@ class ResourceTypeSeeder extends Seeder
         foreach ($resourceTypes as $resourceType) {
             ResourceType::create($resourceType);
         }
-
-        // Créer quelques types supplémentaires via la factory pour les tests
-        ResourceType::factory(3)->create();
     }
 }

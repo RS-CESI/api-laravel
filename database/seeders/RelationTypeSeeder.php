@@ -102,8 +102,5 @@ class RelationTypeSeeder extends Seeder
         foreach ($relationTypes as $relationType) {
             RelationType::create($relationType);
         }
-
-        // Créer quelques types supplémentaires via la factory pour les tests
-        RelationType::factory(3)->create();
     }
 }

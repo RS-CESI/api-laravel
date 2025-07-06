@@ -44,7 +44,10 @@ class ResourceController extends Controller
         }
 
         // Pagination
-        $resources = $query->paginate(12);
+        $perPage = $request->get('per_page', 15);
+        $perPage = min($perPage, 100);
+
+        $resources = $query->paginate($perPage);
 
         return response()->json($resources);
     }

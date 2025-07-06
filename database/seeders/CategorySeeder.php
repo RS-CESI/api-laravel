@@ -98,8 +98,5 @@ class CategorySeeder extends Seeder
         foreach ($categories as $category) {
             Category::create($category);
         }
-
-        // Créer quelques catégories supplémentaires via la factory pour les tests
-        Category::factory(5)->create();
     }
 }
