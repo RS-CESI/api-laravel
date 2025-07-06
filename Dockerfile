@@ -21,9 +21,8 @@ RUN echo "🔧 Activation du module rewrite d'Apache..." && \
     echo "✅ mod_rewrite activé"
 
 # Étape : Installation de Composer
-RUN echo "⬇️ Installation de Composer..." && \
-    COPY --from=composer:2 /usr/bin/composer /usr/bin/composer && \
-    echo "✅ Composer installé"
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN echo "✅ Composer installé"
 
 # Étape : Copie des fichiers Laravel
 COPY . /var/www/html
@@ -44,7 +43,11 @@ RUN echo "🔐 Attribution des droits aux fichiers..." && \
 # Étape finale : Commande de démarrage
 CMD echo "🚀 Démarrage de l'application..." && \
     cp .env.api .env && \
-    php artisan key:generate && \
+    php artisan config:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
     php artisan migrate --seed --force && \
+    php artisan cache:clear && \
+    php artisan key:generate && \
     echo "✅ Application Laravel prête 🎉" && \
     apache2-foreground
