@@ -10,7 +10,7 @@ Route::prefix('public')->middleware('throttle.public')->group(function () {
 });
 
 // Middleware auth
-Route::middleware(['auth:sanctum', 'verified', 'throttle.auth'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     require __DIR__.'/api/resources.php';
     require __DIR__.'/api/favorites.php';
     require __DIR__.'/api/progressions.php';
