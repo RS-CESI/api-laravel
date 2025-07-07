@@ -3,7 +3,6 @@
 use App\Http\Controllers\ResourceController;
 use Illuminate\Support\Facades\Route;
 
-Route::apiResource('resources', ResourceController::class)->except(['index']);
 
 // Routes spécifiques ressources
 Route::prefix('resources')->group(function () {
@@ -21,3 +20,5 @@ Route::prefix('resources')->group(function () {
     Route::post('/{resource}/submit', [ResourceController::class, 'submitForValidation'])
         ->middleware('can.edit.resource');
 });
+
+Route::apiResource('resources', ResourceController::class)->except(['index']);
