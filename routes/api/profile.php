@@ -3,7 +3,7 @@
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('profile')->group(function () {
+Route::prefix('profile')->middleware('auth')->group(function () {
     Route::get('/', [UserController::class, 'profile']);
     Route::put('/', [UserController::class, 'updateProfile']);
     Route::put('/password', [UserController::class, 'updatePassword']);
