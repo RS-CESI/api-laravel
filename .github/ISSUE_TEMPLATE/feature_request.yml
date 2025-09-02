@@ -1,0 +1,93 @@
+name: ✨ Demande de fonctionnalité
+description: Proposer une nouvelle fonctionnalité pour CESIZen
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de proposer cette amélioration ! Vos idées nous aident à faire évoluer CESIZen.
+
+  - type: input
+    id: title
+    attributes:
+      label: Titre de la fonctionnalité
+      description: Résumez en quelques mots la fonctionnalité souhaitée
+      placeholder: Ex. Ajout d'un système de rappels pour les exercices
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module concerné
+      description: Quel module de l'application est concerné ?
+      options:
+        - Comptes utilisateurs
+        - Informations santé mentale
+        - Diagnostics
+        - Exercices de respiration
+        - Activités de détente
+        - Tracker d'émotions
+        - Administration
+        - Autre
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité souhaitée
+      description: Quelle importance accordez-vous à cette fonctionnalité ?
+      options:
+        - Critique (indispensable)
+        - Élevée (très utile)
+        - Moyenne (utile)
+        - Faible (nice to have)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description détaillée
+      description: Décrivez précisément la fonctionnalité souhaitée
+      placeholder: |
+        - Que devrait faire cette fonctionnalité ?
+        - Comment l'utilisateur l'utiliserait-il ?
+        - Dans quel contexte serait-elle utile ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User Story
+      description: Décrivez sous forme de user story
+      placeholder: |
+        En tant que [type d'utilisateur]
+        Je veux [action/fonctionnalité]
+        Afin de [bénéfice/objectif]
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Critères d'acceptation
+      description: Comment saurez-vous que cette fonctionnalité est terminée ?
+      placeholder: |
+        - [ ] Critère 1
+        - [ ] Critère 2
+        - [ ] Critère 3
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Maquettes ou croquis
+      description: Avez-vous des idées visuelles ? (images, liens, descriptions)
+
+  - type: input
+    id: effort
+    attributes:
+      label: Estimation d'effort
+      description: Si vous avez une idée, combien de temps pensez-vous que cela prendrait ?
+      placeholder: Ex. 1 jour, 1 semaine, 1 mois

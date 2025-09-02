@@ -1,0 +1,92 @@
+name: 🐛 Rapport de Bug
+description: Signaler un dysfonctionnement de l'application
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce bug. Cela nous aide à améliorer CESIZen !
+
+  - type: input
+    id: summary
+    attributes:
+      label: Résumé du problème
+      description: Décrivez brièvement le problème rencontré
+      placeholder: Ex. L'application crash lors de l'ajout d'une émotion
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Quelle est la gravité de ce bug ?
+      options:
+        - P0 - Critique (application inutilisable)
+        - P1 - Élevée (fonctionnalité majeure impactée)
+        - P2 - Moyenne (fonctionnalité mineure impactée)
+        - P3 - Faible (amélioration cosmétique)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environnement
+      description: Sur quel environnement le problème se produit-il ?
+      options:
+        - Production (cesizen-prod.herokuapp.com)
+        - Staging (cesizen-staging.herokuapp.com)
+        - Développement local
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      description: Comment reproduire ce problème ?
+      placeholder: |
+        1. Aller sur la page '...'
+        2. Cliquer sur '...'
+        3. Saisir '...'
+        4. Voir l'erreur
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      description: Que devrait-il se passer normalement ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportement actuel
+      description: Que se passe-t-il réellement ?
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Navigateur
+      description: Quel navigateur utilisez-vous ?
+      placeholder: Ex. Chrome 91, Safari 14, Firefox 89
+
+  - type: input
+    id: device
+    attributes:
+      label: Appareil
+      description: Quel appareil utilisez-vous ?
+      placeholder: Ex. iPhone 12, Samsung Galaxy S21, PC Windows 10
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Informations supplémentaires
+      description: Logs, captures d'écran, ou toute autre information utile
