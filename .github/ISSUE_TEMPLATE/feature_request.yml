@@ -1,12 +1,12 @@
 name: ✨ Demande de fonctionnalité
-description: Proposer une nouvelle fonctionnalité pour CESIZen
+description: Proposer une nouvelle fonctionnalité pour RessourceRelationnel
 title: "[FEATURE] "
 labels: ["enhancement", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Merci de proposer cette amélioration ! Vos idées nous aident à faire évoluer CESIZen.
+        Merci de proposer cette amélioration ! Vos idées nous aident à faire évoluer RessourceRelationnel.
 
   - type: input
     id: title
@@ -24,11 +24,7 @@ body:
       description: Quel module de l'application est concerné ?
       options:
         - Comptes utilisateurs
-        - Informations santé mentale
-        - Diagnostics
-        - Exercices de respiration
-        - Activités de détente
-        - Tracker d'émotions
+        - Gestion des ressources
         - Administration
         - Autre
     validations:
