@@ -23,5 +23,6 @@ class RegistrationTest extends TestCase
 
         $response->assertStatus(201);
         $this->assertAuthenticated();
+        $this->assertArrayHasKey('token', $response->json());
     }
 }
