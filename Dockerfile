@@ -1,38 +1,41 @@
-# Utilise l'image PHP officielle avec Apache et extensions utiles
+# ---- 1) Builder Composer : produit vendor/ ----
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-progress --no-interaction
+# (si tu utilises des repos privés: configure ici les auths Composer)
+
+# ---- 2) Runtime PHP + Apache ----
 FROM php:8.2-apache
 
-# Variables d'environnement pour Composer
-ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    COMPOSER_HOME=/composer
-
-# Installe les dépendances système
+# Extensions PHP nécessaires (ajoute-en si besoin)
 RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git curl libpng-dev libonig-dev libxml2-dev \
-    libmcrypt-dev mariadb-client \
-    libcurl4-openssl-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    mariadb-client libcurl4-openssl-dev \
+ && docker-php-ext-install pdo pdo_mysql zip \
+ && a2enmod rewrite
 
-RUN docker-php-ext-install session
+# Docroot -> /public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+ && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Active mod_rewrite pour Apache
-RUN a2enmod rewrite
-
-# Installe Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Copie les fichiers Laravel dans le conteneur
-COPY . /var/www/html
-
-# Positionne le dossier comme dossier de travail
 WORKDIR /var/www/html
 
-RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+# Copie d'abord les vendors du builder
+COPY --from=vendor /app/vendor ./vendor
+# Puis le reste du code
+COPY . .
 
-RUN a2enmod rewrite
+# Permissions & caches
+RUN chown -R www-data:www-data storage bootstrap/cache \
+ && chmod -R ug+rwx storage bootstrap/cache
 
-# Donne les bons droits (peut varier selon l'OS hôte)
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+# OPTION : préparer l’app (clé + caches). Laisse la clé se générer si absente.
+RUN php -r "file_exists('.env') || (file_exists('.env.api') && copy('.env.api', '.env')) || true;" \
+ && (php artisan key:generate --force || true) \
+ && (php artisan config:cache || true) \
+ && (php artisan route:cache || true)
 
-# Lance les migrations + seeders à chaque démarrage
-CMD cp .env.api .env && php artisan key:generate && php artisan migrate --seed --force && apache2-foreground
+EXPOSE 80
+CMD ["apache2-foreground"]
