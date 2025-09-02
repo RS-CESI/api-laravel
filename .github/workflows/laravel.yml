@@ -29,7 +29,7 @@ jobs:
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Copy .env
-        run: cp .env.example .env
+        run: cp .env.api .env
 
       - name: Generate key
         run: php artisan key:generate
